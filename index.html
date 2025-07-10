@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 조직 AI 건강진단 ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .ai-message {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 15px 15px 15px 5px;
+            border-left: 4px solid #2196f3;
+            margin-right: 50px;
+        }
+
+        .user-message {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 15px 15px 5px 15px;
+            border-right: 4px solid #4caf50;
+            margin-left: 50px;
+            text-align: right;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option-btn {
+            background: #fff;
+            border: 2px solid #2196f3;
+            color: #2196f3;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .option-btn:hover {
+            background: #2196f3;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33,150,243,0.3);
+        }
+
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .text-input:focus {
+            border-color: #2196f3;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .results-container {
+            padding: 30px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+
+        .score {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .radar-chart {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            background: #f5f5f5;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .restart-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .option-btn {
+                min-width: 60px;
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI 조직 건강진단</h1>
+            <p>피터 드러커 5대 원칙 기반 • 소요시간: 5분</p>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="message">
+                <div class="ai-message">
+                    안녕하세요! 👋 저는 여러분의 조직 건강진단을 도와드리는 AI입니다.<br><br>
+                    <strong>소요시간:</strong> 5분<br>
+                    <strong>질문 수:</strong> 10개<br>
+                    <strong>익명성:</strong> 완전 보장<br><br>
+                    시작하시겠어요?
+                    <div class="options">
+                        <button class="option-btn" onclick="startDiagnosis()">🚀 시작하기</button>
+                        <button class="option-btn" onclick="showInfo()">ℹ️ 더 알아보기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <h2>🎉 진단 완료!</h2>
+            <div class="result-card">
+                <h3>우리 조직 종합 점수</h3>
+                <div class="score" id="totalScore">0.0</div>
+                <p>5점 만점</p>
+            </div>
+            
+            <div id="detailedResults"></div>
+            
+            <button class="restart-btn" onclick="restart()">다시 진단하기</button>
+            <button class="restart-btn" onclick="downloadResults()">결과 다운로드</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = -1;
+        let responses = {};
+        let userInfo = {};
+        
+        const questions = [
+            {
+                id: 'dept',
+                text: '먼저 소속 부서를 알려주세요 (선택사항)',
+                type: 'choice',
+                options: ['직접서비스팀', '관리지원팀', '기획팀', '기타', '응답안함'],
+                category: 'info'
+            },
+            {
+                id: 'career',
+                text: '근무 경력을 알려주세요 (선택사항)',
+                type: 'choice',
+                options: ['1년미만', '1-3년', '3년이상', '응답안함'],
+                category: 'info'
+            },
+            {
+                id: 'mission_clarity',
+                text: '우리 조직의 사명(존재 이유)이 명확하게 공유되어 있다고 생각하시나요?',
+                type: 'scale',
+                category: 'mission'
+            },
+            {
+                id: 'mission_connection',
+                text: '사명이 일상 업무와 구체적으로 연결되어 있다고 느끼시나요?',
+                type: 'scale',
+                category: 'mission'
+            },
+            {
+                id: 'customer_clarity',
+                text: '우리가 누구를 위해 존재하는지(고객)가 명확하다고 생각하시나요?',
+                type: 'scale',
+                category: 'customer'
+            },
+            {
+                id: 'customer_feedback',
+                text: '고객의 피드백이 서비스 개선에 실제로 반영된다고 생각하시나요?',
+                type: 'scale',
+                category: 'customer'
+            },
+            {
+                id: 'results_measurement',
+                text: '우리의 성과를 "고객의 변화"로 측정하고 있다고 생각하시나요?',
+                type: 'scale',
+                category: 'results'
+            },
+            {
+                id: 'learning_culture',
+                text: '실패나 문제에서 배운 점을 조직적으로 공유한다고 생각하시나요?',
+                type: 'scale',
+                category: 'results'
+            },
+            {
+                id: 'people_development',
+                text: '구성원의 성장과 발전을 체계적으로 지원한다고 생각하시나요?',
+                type: 'scale',
+                category: 'people'
+            },
+            {
+                id: 'strengths_utilization',
+                text: '각자의 강점을 파악하고 활용하는 시스템이 있다고 생각하시나요?',
+                type: 'scale',
+                category: 'people'
+            },
+            {
+                id: 'authority_distribution',
+                text: '권한과 책임이 명확하게 분배되어 있다고 생각하시나요?',
+                type: 'scale',
+                category: 'leadership'
+            },
+            {
+                id: 'learning_from_mistakes',
+                text: '실수를 공유하고 함께 학습하는 문화가 있다고 생각하시나요?',
+                type: 'scale',
+                category: 'leadership'
+            }
+        ];
+
+        function addMessage(content, isUser = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = isUser ? 'user-message' : 'ai-message';
+            messageContent.innerHTML = content;
+            
+            messageDiv.appendChild(messageContent);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            const progressHtml = `
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+                <small>진행률: ${Math.round(progress)}% (${currentQuestion + 1}/${questions.length})</small>
+            `;
+            return progressHtml;
+        }
+
+        function startDiagnosis() {
+            addMessage('네! 그럼 시작해보겠습니다! 😊');
+            setTimeout(() => {
+                nextQuestion();
+            }, 1000);
+        }
+
+        function showInfo() {
+            const infoText = `
+                📋 <strong>진단 정보</strong><br><br>
+                • <strong>기반 이론:</strong> 피터 드러커의 5대 경영 원칙<br>
+                • <strong>진단 영역:</strong> 사명, 고객, 성과, 인재, 리더십<br>
+                • <strong>응답 방식:</strong> 1-5점 척도<br>
+                • <strong>소요 시간:</strong> 약 5분<br>
+                • <strong>결과:</strong> 즉시 확인 가능<br><br>
+                시작하시겠어요?
+                <div class="options">
+                    <button class="option-btn" onclick="startDiagnosis()">🚀 시작하기</button>
+                </div>
+            `;
+            addMessage(infoText);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const question = questions[currentQuestion];
+            let questionHtml = updateProgress() + '<br><br>' + question.text;
+
+            if (question.type === 'choice') {
+                questionHtml += '<div class="options">';
+                question.options.forEach((option, index) => {
+                    questionHtml += `<button class="option-btn" onclick="selectChoice('${question.id}', '${option}')">${option}</button>`;
+                });
+                questionHtml += '</div>';
+            } else if (question.type === 'scale') {
+                questionHtml += '<br><br><div class="options">';
+                for (let i = 1; i <= 5; i++) {
+                    const label = ['매우 아니다', '아니다', '보통', '그렇다', '매우 그렇다'][i-1];
+                    questionHtml += `<button class="option-btn" onclick="selectScale('${question.id}', ${i})">${i}점<br><small>${label}</small></button>`;
+                }
+                questionHtml += '</div>';
+            }
+
+            addMessage(questionHtml);
+        }
+
+        function selectChoice(questionId, choice) {
+            responses[questionId] = choice;
+            addMessage(`"${choice}"을(를) 선택하셨네요! 👍`, true);
+            
+            setTimeout(() => {
+                if (currentQuestion === 0) {
+                    addMessage('감사합니다! 다음 질문이에요 😊');
+                } else if (currentQuestion === 1) {
+                    addMessage('좋습니다! 이제 본격적인 진단을 시작해볼게요! 🎯');
+                }
+                setTimeout(nextQuestion, 1000);
+            }, 500);
+        }
+
+        function selectScale(questionId, score) {
+            responses[questionId] = score;
+            const labels = ['매우 아니다', '아니다', '보통', '그렇다', '매우 그렇다'];
+            addMessage(`${score}점 (${labels[score-1]})을 선택하셨네요!`, true);
+            
+            setTimeout(() => {
+                const remaining = questions.length - currentQuestion - 1;
+                if (remaining > 0) {
+                    addMessage(`좋습니다! 다음 질문이에요 (${remaining}개 남음) 🎯`);
+                } else {
+                    addMessage('마지막 질문이었어요! 결과를 분석 중입니다... 🤖✨');
+                }
+                setTimeout(nextQuestion, 1000);
+            }, 500);
+        }
+
+        function calculateResults() {
+            const categories = {
+                mission: [],
+                customer: [],
+                results: [],
+                people: [],
+                leadership: []
+            };
+
+            // 카테고리별 점수 분류
+            questions.forEach(q => {
+                if (q.category !== 'info' && responses[q.id]) {
+                    categories[q.category].push(responses[q.id]);
+                }
+            });
+
+            // 카테고리별 평균 계산
+            const scores = {};
+            Object.keys(categories).forEach(category => {
+                if (categories[category].length > 0) {
+                    scores[category] = categories[category].reduce((a, b) => a + b, 0) / categories[category].length;
+                }
+            });
+
+            // 전체 평균
+            const totalScore = Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length;
+
+            return { scores, totalScore };
+        }
+
+        function getScoreInterpretation(score) {
+            if (score >= 4.0) return { level: '우수', emoji: '🟢', message: '정말 잘하고 있어요!' };
+            if (score >= 3.0) return { level: '양호', emoji: '🟡', message: '기본기는 탄탄해요' };
+            if (score >= 2.0) return { level: '보통', emoji: '🟠', message: '개선하면 더 좋아져요' };
+            return { level: '주의', emoji: '🔴', message: '관심과 노력이 필요해요' };
+        }
+
+        function showResults() {
+            const { scores, totalScore } = calculateResults();
+            
+            document.getElementById('chatContainer').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'block';
+            
+            document.getElementById('totalScore').textContent = totalScore.toFixed(1);
+            
+            const categoryNames = {
+                mission: '사명 중심',
+                customer: '고객 중심', 
+                results: '성과 중심',
+                people: '인재 개발',
+                leadership: '리더십'
+            };
+
+            let detailedHtml = '';
+            Object.keys(scores).forEach(category => {
+                const score = scores[category];
+                const interpretation = getScoreInterpretation(score);
+                
+                detailedHtml += `
+                    <div class="result-card">
+                        <h4>${interpretation.emoji} ${categoryNames[category]}</h4>
+                        <div style="font-size: 24px; margin: 10px 0;">${score.toFixed(1)}점</div>
+                        <p>${interpretation.message}</p>
+                    </div>
+                `;
+            });
+
+            // 강점과 개선점 추가
+            const maxScore = Math.max(...Object.values(scores));
+            const minScore = Math.min(...Object.values(scores));
+            const strengthCategory = Object.keys(scores).find(key => scores[key] === maxScore);
+            const improvementCategory = Object.keys(scores).find(key => scores[key] === minScore);
+
+            detailedHtml += `
+                <div style="margin-top: 30px; padding: 20px; background: #f0f8ff; border-radius: 15px;">
+                    <h3>📊 종합 분석</h3>
+                    <p><strong>🎉 우리의 강점:</strong> ${categoryNames[strengthCategory]} (${maxScore.toFixed(1)}점)</p>
+                    <p><strong>🎯 개선 포인트:</strong> ${categoryNames[improvementCategory]} (${minScore.toFixed(1)}점)</p>
+                    <p><strong>💡 한 줄 요약:</strong> ${getOrganizationSummary(totalScore)}</p>
+                </div>
+            `;
+
+            document.getElementById('detailedResults').innerHTML = detailedHtml;
+            
+            // 결과를 로컬 스토리지에 저장 (관리자가 수집할 수 있도록)
+            saveResults({ responses, scores, totalScore, timestamp: new Date().toISOString() });
+        }
+
+        function getOrganizationSummary(score) {
+            if (score >= 3.5) return "전반적으로 건강한 조직입니다! 강점을 더욱 키워나가세요.";
+            if (score >= 2.5) return "기본기는 갖춘 조직입니다. 개선 포인트에 집중해보세요.";
+            return "조직 차원의 관심과 투자가 필요한 시점입니다.";
+        }
+
+        function saveResults(data) {
+            // 결과를 로컬스토리지에 저장
+            const existingResults = JSON.parse(localStorage.getItem('organizationDiagnosisResults') || '[]');
+            existingResults.push(data);
+            localStorage.setItem('organizationDiagnosisResults', JSON.stringify(existingResults));
+            
+            // 간단한 통계를 콘솔에 출력 (개발자 도구에서 확인 가능)
+            console.log('새로운 진단 결과가 저장되었습니다:', data);
+            console.log('전체 저장된 결과 수:', existingResults.length);
+        }
+
+        function restart() {
+            currentQuestion = -1;
+            responses = {};
+            userInfo = {};
+            
+            document.getElementById('chatContainer').innerHTML = `
+                <div class="message">
+                    <div class="ai-message">
+                        안녕하세요! 👋 저는 여러분의 조직 건강진단을 도와드리는 AI입니다.<br><br>
+                        <strong>소요시간:</strong> 5분<br>
+                        <strong>질문 수:</strong> 10개<br>
+                        <strong>익명성:</strong> 완전 보장<br><br>
+                        시작하시겠어요?
+                        <div class="options">
+                            <button class="option-btn" onclick="startDiagnosis()">🚀 시작하기</button>
+                            <button class="option-btn" onclick="showInfo()">ℹ️ 더 알아보기</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('chatContainer').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'none';
+        }
+
+        function downloadResults() {
+            const { scores, totalScore } = calculateResults();
+            const data = {
+                timestamp: new Date().toLocaleString('ko-KR'),
+                department: responses.dept || '미응답',
+                career: responses.career || '미응답',
+                scores: scores,
+                totalScore: totalScore.toFixed(1),
+                responses: responses
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `조직진단결과_${new Date().getTime()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 관리자용 함수 (콘솔에서 실행)
+        function getAllResults() {
+            const results = JSON.parse(localStorage.getItem('organizationDiagnosisResults') || '[]');
+            console.log('전체 진단 결과:', results);
+            return results;
+        }
+
+        function exportAllResults() {
+            const results = getAllResults();
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `전체_조직진단결과_${new Date().getTime()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 전역 함수로 노출 (관리자가 브라우저 콘솔에서 사용할 수 있도록)
+        window.getAllResults = getAllResults;
+        window.exportAllResults = exportAllResults;
+    </script>
+</body>
+</html>
